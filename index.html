@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="deidentifier">
+<head>
+	<meta charset="UTF-8">
+	<title>Babel data deidentifier</title>
+
+	<link rel="stylesheet" href="./assets/css/bootstrap.css">
+	<link rel="stylesheet" href="./assets/css/font-awesome.css"/>
+	<link rel="stylesheet" href="./assets/css/select.css"/>
+	<link rel="stylesheet" href="./assets/css/style.css">
+
+	<script type="text/javascript" src="./assets/libs/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="./assets/libs/underscore-min.js"></script>
+	<script type="text/javascript" src="./assets/libs/angular.min.js"></script>
+	<script type="text/javascript" src="./assets/libs/angular-sanitize.min.js"></script>
+	<script type="text/javascript" src="./assets/libs/angular-ui-router.js"></script>
+	<script type="text/javascript" src="./assets/libs/select.min.js"></script>
+
+	<script type="text/javascript" src="./app/app.module.js"></script>
+	<script type="text/javascript" src="./app/components/home/controllers/home.controller.js"></script>
+	<script type="text/javascript" src="./app/components/home/services/home.factory.js"></script>
+	<script type="text/javascript" src="./app/components/home/services/data.factory.js"></script>
+	<script type="text/javascript" src="./app/components/home/services/definition.factory.js"></script>
+
+</head>
+<body>
+
+	<div class="container">
+
+		<div ng-controller="HomeController">
+
+			<button ng-click="pickFile()" class="btn btn-primary btn-file-select" ng-if="!file.name">Select Data File</button>
+
+			<!--<div class="well clearfix" ng-if="file.name">
+				<div ng-if="file.name && !isParsing">
+					<div><strong>{{file.name}}</strong></div>
+					<div><strong>Row Count: </strong> {{file.rowCount | number}}</div>
+				</div>
+				<div class="text-center" ng-if="file.name && isParsing">
+					<h3 class="parsing"><i class="fa fa-spinner"></i> Parsing File</h3>
+				</div>
+			</div>-->
+
+			<div class="well options" ng-if="file.name" ng-click="dump()">
+				<div class="file-name">
+					<div>{{file.name}}</div>
+					<button ng-click="clearFile()" ng-if="file.name" class="btn btn-danger btn-clear">Clear</button>
+				</div>
+				<div class="form-group">
+					<label>Data Delimiter</label>
+					<div>
+						<label class="checkbox-inline" ng-repeat="delimiter in delimiters">
+							<input type="radio" value="{{delimiter.val}}" ng-model="options.delimiter"> {{delimiter.title}}
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Text Qualifier</label>
+					<div>
+						<label class="checkbox-inline" ng-repeat="textQualifier in textQualifiers">
+							<input type="radio" value="{{textQualifier.val}}" ng-model="options.textQualifier"> {{textQualifier.title}}
+						</label>
+					</div>
+				</div>
+				<div>
+					<button ng-click="analyze()" class="btn btn-primary btn-block btn-analyze">Analyze</button>
+				</div>
+			</div>
+
+			<div class="well data-components" ng-if="file.name && file.rowCount && !isParsing">
+				<div class="analyze-result">
+					( Found {{file.columns.length | number}} columns and {{file.rowCount | number}} rows in your data file. )
+				</div>
+
+				<div class="form-group">
+					<label>Data Components</label>
+					<div class="form-horizontal">
+						<div class="form-group" ng-repeat="dataComponent in dataComponents">
+							<label class="col-sm-4 control-label">{{dataComponent.title}}</label>
+							<div class="col-sm-8">
+								<!--<select class="form-control" ng-options="o as o for o in file.columns" ng-model="dataComponent.dataField"></select>-->
+
+                                <div class="input-group">
+                                    <ui-select allow-clear ng-model="dataComponent.dataField" theme="bootstrap">
+                                        <ui-select-match placeholder="Select a data column">{{$select.selected}}</ui-select-match>
+                                        <ui-select-choices repeat="item in file.columns | filter: $select.search">
+                                            <span ng-bind-html="item | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+
+                                    <span class="input-group-btn">
+                                        <button type="button" ng-click="dataComponent.dataField = ''" class="btn btn-default">
+                                            <span class="fa fa-trash"></span>
+                                        </button>
+                                    </span>
+                                </div>
+							</div>
+						</div>
+					</div>
+				</div>
+                <div class="transform">
+                    <div class="text-center" ng-if="!isTransforming">
+                        <button ng-click="transform()" class="btn btn-primary btn-block">De-identify</button>
+                    </div>
+
+                    <div ng-if="isTransforming">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{percent}}%;" ng-class="{'active': percent<100}">
+                                {{percent}}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+			<!--<div>
+                <strong>Header Columns: </strong>
+                <table class="table table-condensed table-bordered">
+                    <tr ng-repeat="column in file.columns"><td>{{column}}</td></tr>
+                </table>
+            </div>-->
+		</div>
+
+	</div><!-- /.container -->
+
+</body>
+</html>

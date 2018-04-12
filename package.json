@@ -1,0 +1,31 @@
+{
+  "name": "data-deidentifier",
+  "productName": "Data Deidentifier",
+  "version": "0.0.1",
+  "description": "Babel data deidentifier",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . data-deidentifier --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Data Deidentifier\"",
+    "package-linux": "electron-packager . data-deidentifier-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Tarafder Ashek E Elahi",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "dependencies": {
+    "faker": "^4.1.0",
+    "fast-csv": "^2.4.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "electron": "^1.8.4",
+    "electron-packager": "^12.0.0"
+  }
+}
