@@ -63,11 +63,14 @@
 					</div>
 				</div>
 				<div>
-					<button ng-click="analyze()" class="btn btn-primary btn-block btn-analyze">Analyze</button>
+					<button ng-click="analyze()" class="btn btn-primary btn-block btn-analyze">
+                        <span ng-if="isParsing"><i class="fa fa-spinner"></i> Analyzing</span>
+                        <span ng-if="!isParsing">Analyze</span>
+                    </button>
 				</div>
 			</div>
 
-			<div class="well data-components" ng-if="file.name && file.rowCount && !isParsing">
+			<div class="well data-components" ng-if="file.name && file.columns.length && !isParsing">
 				<div class="analyze-result">
 					( Found {{file.columns.length | number}} columns and {{file.rowCount | number}} rows in your data file. )
 				</div>

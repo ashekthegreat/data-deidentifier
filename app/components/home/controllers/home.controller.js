@@ -13,9 +13,8 @@
         $scope.isParsing = false;
         $scope.isTransforming = false;
         $scope.delimiters = DefinitionFactory.getDelimiters();
-
         $scope.textQualifiers = DefinitionFactory.getTextQualifiers();
-        $scope.dataComponents = DefinitionFactory.getDataComponents();
+
 
         /*$scope.dataComponents = {
             hicn: "hicn_medical_claims_header",
@@ -29,11 +28,14 @@
             medicaidMemberId: "medicaid_member_id_medical_claims_header"
         };*/
 
-        $scope.options = {
-            delimiter: "|",
-            textQualifier: '"',
-            definition: {}
+        $scope.buildOptions = function (def) {
+            $scope.options = {
+                delimiter: def.delimiter,
+                textQualifier: def.qualifier,
+                definition: {}
+            };
         };
+
         $scope.dump = function () {
             console.log($scope.dataComponents);
         };
@@ -56,6 +58,13 @@
                 $scope.file = {
                     name: files[0]
                 };
+                HomeFactory.parseFirstLine(files[0]).then(function (def) {
+                    console.log("Got delimiter: " + def.delimiter);
+                    console.log("Got qualifier: " + def.qualifier);
+                    $scope.buildOptions(def);
+                    $scope.$apply();
+                });
+
                 $scope.$apply();
             })
         };
@@ -73,9 +82,21 @@
                     HomeFactory.parseHeader($scope.file.name, $scope.options).then(function (response) {
                         $scope.file.columns = response.columns;
                         $scope.isParsing = false;
+                        $scope.dataComponents = DefinitionFactory.getDataComponents($scope.file.columns);
+
+                        //console.log($scope.dataComponents);
                         //console.log(response.columns);
+                    }, function (error) {
+                        $timeout(function () {
+                            alert("Could not parse data. Please select appropriate delimiter and qualifier.");
+                            $scope.isParsing = false;
+                        }, 0);
+                        console.log(error);
                     });
                 }, function (error) {
+                    $timeout(function () {
+                        alert("Could not parse file. Please check if the file exist and no other program is blocking it.");
+                    }, 0);
                     console.log(error);
                 });
             }, 0);

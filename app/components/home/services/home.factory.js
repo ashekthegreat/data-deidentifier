@@ -6,6 +6,7 @@
     var _ = require("underscore");
     var csv = require("fast-csv");
     var fs = require("fs");
+    var firstline = require("firstline")
 
     var definition = {
         hicn: "hicn_medical_claims_header",
@@ -19,9 +20,9 @@
         medicaidMemberId: "medicaid_member_id_medical_claims_header"
     };
 
-    HomeFactory.$inject = ["$q", "DataFactory"];
+    HomeFactory.$inject = ["$q", "DataFactory", "DefinitionFactory"];
 
-    function HomeFactory($q, DataFactory) {
+    function HomeFactory($q, DataFactory, DefinitionFactory) {
         var factory = {};
 
         var generatedPairs = [];
@@ -37,43 +38,42 @@
                 // its a new pair. lets create one and push
                 baseCounter += 1;
                 var gender = "M";
-                if(definition.gender && row[definition.gender] && row[definition.gender].toUpperCase().charAt(0) == "F"){
+                if (definition.gender && row[definition.gender] && row[definition.gender].toUpperCase().charAt(0) == "F") {
                     gender = "F";
                 }
 
                 produced = {
                     id: row[definition.hicn]
                 };
-                if(sourceFile.columns.indexOf(definition.hicn)>-1){
+                if (sourceFile.columns.indexOf(definition.hicn) > -1) {
                     produced[definition.hicn] = DataFactory.hicn(baseCounter);
                 }
-                if(sourceFile.columns.indexOf(definition.lastName)>-1){
+                if (sourceFile.columns.indexOf(definition.lastName) > -1) {
                     produced[definition.lastName] = DataFactory.lastName();
                 }
-                if(sourceFile.columns.indexOf(definition.firstName)>-1){
+                if (sourceFile.columns.indexOf(definition.firstName) > -1) {
                     produced[definition.firstName] = DataFactory.firstName(gender);
                 }
-                if(sourceFile.columns.indexOf(definition.zip)>-1){
+                if (sourceFile.columns.indexOf(definition.zip) > -1) {
                     produced[definition.zip] = DataFactory.zip();
                 }
-                if(sourceFile.columns.indexOf(definition.dob)>-1){
+                if (sourceFile.columns.indexOf(definition.dob) > -1) {
                     produced[definition.dob] = DataFactory.dob();
                 }
-                if(sourceFile.columns.indexOf(definition.address)>-1){
+                if (sourceFile.columns.indexOf(definition.address) > -1) {
                     produced[definition.address] = DataFactory.address();
                 }
-                if(sourceFile.columns.indexOf(definition.ssn)>-1){
+                if (sourceFile.columns.indexOf(definition.ssn) > -1) {
                     produced[definition.ssn] = DataFactory.ssn(baseCounter);
                 }
-                if(sourceFile.columns.indexOf(definition.medicaidMemberId)>-1){
+                if (sourceFile.columns.indexOf(definition.medicaidMemberId) > -1) {
                     produced[definition.medicaidMemberId] = DataFactory.medicaidId();
                 }
 
                 generatedPairs.push(produced);
             }
 
-            var cloned = {};
-            _.extend(cloned, produced);
+            var cloned = angular.copy(produced);
             if (cloned.id) {
                 delete cloned.id;
             }
@@ -85,6 +85,41 @@
             _.extend(row, replacePair);
             return row;
         }
+
+        factory.parseFirstLine = function (fileName) {
+
+            return firstline(fileName).then(function (line) {
+                var qualifier = "";
+                var delimiter = ",";
+
+                var allDelimiters = DefinitionFactory.getDelimiters();
+
+                if (line.length) {
+                    // check for qualifier
+                    var firstChar = line.charAt(0);
+                    if (firstChar == "'") {
+                        qualifier = "'";
+                    } else if (firstChar == '"') {
+                        qualifier = '"';
+                    }
+
+                    var maxFoundSoFar = 0;
+                    _.each(allDelimiters, function (item) {
+                        var count = (line.split(item.val).length - 1);
+                        console.log("Columns: " + count);
+                        console.log(item.val);
+                        if (count > maxFoundSoFar) {
+                            maxFoundSoFar = count;
+                            delimiter = item.val;
+                        }
+                    })
+                }
+                return {
+                    qualifier: qualifier,
+                    delimiter: delimiter
+                };
+            });
+        };
 
         factory.parse = function (fileName) {
 
@@ -99,7 +134,7 @@
                     .on('end', function () {
                         console.log(count);
                         resolve({
-                            rowCount: count-1   // excluding header row
+                            rowCount: count - 1   // excluding header row
                         });
                     })
                     .on('error', function () {
@@ -127,6 +162,10 @@
                     .on("end", function () {
                         csvStream.emit('donereading');
                     })
+                    .on('error', function (error) {
+                        console.log("Analyze failed");
+                        reject(error);
+                    })
                     .on('donereading', function () {
                         fileStream.close();
                         csvStream.removeListener('data', onData);
@@ -138,8 +177,8 @@
         };
 
         factory.transform = function (sourceFile, targetName, options) {
-            console.log("Base Counter: " + baseCounter);
-            console.log("Generated: " + generatedPairs.length);
+            //console.log("Base Counter: " + baseCounter);
+            //console.log("Generated: " + generatedPairs.length);
 
             var count = 0;
             definition = options.definition;
@@ -163,11 +202,11 @@
                         count: count
                     });
                 })
-                .on('error', function(error) {
+                .on('error', function (error) {
                     console.log("Catch an invalid csv file!!!");
                     deferred.reject(error);
                 })
-                .pipe(csv.createWriteStream({headers: true , quoteColumns: !!options.textQualifier, delimiter: options.delimiter}))   // , quoteColumns:true
+                .pipe(csv.createWriteStream({headers: true, quoteColumns: !!options.textQualifier, delimiter: options.delimiter}))   // , quoteColumns:true
                 .pipe(fs.createWriteStream(targetName, {encoding: "utf8"}));
 
             return deferred.promise;
