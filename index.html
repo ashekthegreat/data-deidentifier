@@ -103,7 +103,7 @@
 				</div>
                 <div class="transform">
                     <div class="text-center" ng-if="!isTransforming">
-                        <button ng-click="transform()" class="btn btn-primary btn-block">De-identify</button>
+                        <button ng-click="transform()" class="btn btn-primary btn-block" ng-disabled="!dataComponents[0].dataField">De-identify</button>
                     </div>
 
                     <div ng-if="isTransforming">

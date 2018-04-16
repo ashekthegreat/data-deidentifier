@@ -9,6 +9,7 @@
     var firstline = require("firstline")
 
     var definition = {
+        id: "member_id",
         hicn: "hicn_medical_claims_header",
         firstName: "member_first_name_medical_claims_header",
         lastName: "member_last_name_medical_claims_header",
@@ -31,7 +32,7 @@
         function getReplacePair(row, generatedPairs, sourceFile) {
             // check if such a pair already exists. if yes, return that
             var produced = _.find(generatedPairs, function (pair) {
-                return pair.id == row[definition.hicn];
+                return pair.id == row[definition.id];
             });
 
             if (!produced) {
@@ -43,7 +44,7 @@
                 }
 
                 produced = {
-                    id: row[definition.hicn]
+                    id: row[definition.id]
                 };
                 if (sourceFile.columns.indexOf(definition.hicn) > -1) {
                     produced[definition.hicn] = DataFactory.hicn(baseCounter);

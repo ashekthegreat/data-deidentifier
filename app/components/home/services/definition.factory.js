@@ -46,6 +46,10 @@
         ];
         factory.dataComponents = [
             {
+                title: "Member ID",
+                val: "id",
+                dataField: "member_id"
+            }, {
                 title: "Member HICN",
                 val: "hicn",
                 dataField: "hicn_medical_claims_header"
