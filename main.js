@@ -11,9 +11,11 @@ const faker = require('faker');
 let win;
 
 function createWindow() {
+    var isDebug = true;
+
     // Create the browser window.
     win = new BrowserWindow({
-        width: 800,
+        width: (isDebug ? 1400 : 800),
         height: 800,
         backgroundColor: '#034069'
     });
@@ -25,8 +27,10 @@ function createWindow() {
         slashes: true
     }));
 
-    // Open the DevTools.
-    //win.webContents.openDevTools();
+    if(isDebug){
+        // Open the DevTools.
+        win.webContents.openDevTools();
+    }
 
     // Emitted when the window is closed.
     win.on('closed', () => {

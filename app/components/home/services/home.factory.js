@@ -74,11 +74,12 @@
                 generatedPairs.push(produced);
             }
 
-            var cloned = angular.copy(produced);
+            return _.omit(produced, 'id');
+            /*var cloned = angular.copy(produced);
             if (cloned.id) {
                 delete cloned.id;
             }
-            return cloned;
+            return cloned;*/
         }
 
         function formatData(row, generatedPairs, sourceFile) {
@@ -107,8 +108,8 @@
                     var maxFoundSoFar = 0;
                     _.each(allDelimiters, function (item) {
                         var count = (line.split(item.val).length - 1);
-                        console.log("Columns: " + count);
-                        console.log(item.val);
+                        //console.log("Columns: " + count);
+                        //console.log(item.val);
                         if (count > maxFoundSoFar) {
                             maxFoundSoFar = count;
                             delimiter = item.val;
